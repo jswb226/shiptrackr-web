@@ -828,22 +828,88 @@ input::-webkit-search-cancel-button,input::-webkit-search-decoration,input::-web
   
   // Per-type SVG silhouettes (all in a 0 0 20 24 viewBox, bow at top)
   var SHIP_PATHS = {
-    cargo:     &#x27;M10 2 L17 8 L16 22 L4 22 L3 8 Z&#x27;,                    // stocky boxy hull + short bow
-    tanker:    &#x27;M10 1 L14 6 L14 22 L6 22 L6 6 Z&#x27;,                    // long narrow straight-sided pill
-    passenger: &#x27;M10 1 L16 9 L14 22 L6 22 L4 9 Z&#x27;,                    // sleek pointed ferry
-    fishing:   &#x27;M10 3 L13 9 L13 19 L11 21 L9 21 L7 19 L7 9 Z&#x27;,       // tall narrow w/ tail
-    tug_pilot: &#x27;M10 3 L15 9 L15 19 L5 19 L5 9 Z&#x27;,                    // short &amp; stubby
-    pleasure:  &#x27;M10 5 L14 18 L10 16 L6 18 Z&#x27;,                        // tiny dinghy triangle
-    other:     &#x27;M10 1 L18 22 L10 17 L2 22 Z&#x27;                         // classic arrow
+    cargo:     &#x27;M10 2 L17 8 L16 22 L4 22 L3 8 Z&#x27;,
+    tanker:    &#x27;M10 1 L14 6 L14 22 L6 22 L6 6 Z&#x27;,
+    passenger: &#x27;M10 1 L16 9 L14 22 L6 22 L4 9 Z&#x27;,
+    fishing:   &#x27;M10 3 L13 9 L13 19 L11 21 L9 21 L7 19 L7 9 Z&#x27;,
+    tug_pilot: &#x27;M10 3 L15 9 L15 19 L5 19 L5 9 Z&#x27;,
+    pleasure:  &#x27;M10 5 L14 18 L10 16 L6 18 Z&#x27;,
+    other:     &#x27;M10 1 L18 22 L10 17 L2 22 Z&#x27;
   };
   var TYPE_SIZE = {
     cargo: 1.05, tanker: 1.05, passenger: 1.0, fishing: 0.85,
     tug_pilot: 0.85, pleasure: 0.75, other: 1.0
   };
 
-  // Directional arrow-style SVG, rotated by heading (or course when heading unavailable).
-  // `extraScale` (optional) scales the entire icon by zoom level — small at low
-  // zoom, full silhouette at close zoom.
+  // ---------------------------------------------------------------------
+  // High-zoom detailed silhouettes — only rendered when extraScale &gt;= 2.0
+  // (i.e. map zoom level &gt;= 13). Each takes the type colour and bakes in
+  // realistic deck features / superstructure / windows / masts so vessels
+  // are instantly recognisable as cargo vs tanker vs passenger etc.
+  // Each function returns inner &lt;svg&gt; markup; outer wrapper added by shipSvg.
+  // ---------------------------------------------------------------------
+  function detailedSvg(color, stroke, type) {
+    if (type === &#x27;cargo&#x27;) {
+      // Container ship: stacked container blocks + stern bridge superstructure
+      return &#x27;&#x27;
+        + &#x27;&lt;path d=&quot;M10 1 L17 8 L16 22 L4 22 L3 8 Z&quot; fill=&quot;&#x27; + color + &#x27;&quot; stroke=&quot;&#x27; + stroke + &#x27;&quot; stroke-width=&quot;1.2&quot; stroke-linejoin=&quot;round&quot;/&gt;&#x27;
+        + &#x27;&lt;rect x=&quot;5&quot; y=&quot;11&quot; width=&quot;3&quot; height=&quot;2.4&quot; fill=&quot;#FFFFFF22&quot; stroke=&quot;&#x27; + stroke + &#x27;&quot; stroke-width=&quot;0.4&quot;/&gt;&#x27;
+        + &#x27;&lt;rect x=&quot;9&quot; y=&quot;11&quot; width=&quot;3&quot; height=&quot;2.4&quot; fill=&quot;#FFFFFF22&quot; stroke=&quot;&#x27; + stroke + &#x27;&quot; stroke-width=&quot;0.4&quot;/&gt;&#x27;
+        + &#x27;&lt;rect x=&quot;13&quot; y=&quot;11&quot; width=&quot;2.5&quot; height=&quot;2.4&quot; fill=&quot;#FFFFFF22&quot; stroke=&quot;&#x27; + stroke + &#x27;&quot; stroke-width=&quot;0.4&quot;/&gt;&#x27;
+        + &#x27;&lt;rect x=&quot;5&quot; y=&quot;14&quot; width=&quot;3&quot; height=&quot;2.4&quot; fill=&quot;#FFFFFF22&quot; stroke=&quot;&#x27; + stroke + &#x27;&quot; stroke-width=&quot;0.4&quot;/&gt;&#x27;
+        + &#x27;&lt;rect x=&quot;9&quot; y=&quot;14&quot; width=&quot;3&quot; height=&quot;2.4&quot; fill=&quot;#FFFFFF22&quot; stroke=&quot;&#x27; + stroke + &#x27;&quot; stroke-width=&quot;0.4&quot;/&gt;&#x27;
+        + &#x27;&lt;rect x=&quot;13&quot; y=&quot;14&quot; width=&quot;2.5&quot; height=&quot;2.4&quot; fill=&quot;#FFFFFF22&quot; stroke=&quot;&#x27; + stroke + &#x27;&quot; stroke-width=&quot;0.4&quot;/&gt;&#x27;
+        + &#x27;&lt;rect x=&quot;6.5&quot; y=&quot;18&quot; width=&quot;7&quot; height=&quot;3&quot; fill=&quot;&#x27; + stroke + &#x27;&quot; opacity=&quot;0.55&quot;/&gt;&#x27;;
+    }
+    if (type === &#x27;tanker&#x27;) {
+      // Tanker: pipework manifold deck + aft superstructure
+      return &#x27;&#x27;
+        + &#x27;&lt;path d=&quot;M10 1 L14 6 L14 22 L6 22 L6 6 Z&quot; fill=&quot;&#x27; + color + &#x27;&quot; stroke=&quot;&#x27; + stroke + &#x27;&quot; stroke-width=&quot;1.2&quot; stroke-linejoin=&quot;round&quot;/&gt;&#x27;
+        + &#x27;&lt;line x1=&quot;10&quot; y1=&quot;7&quot; x2=&quot;10&quot; y2=&quot;20&quot; stroke=&quot;&#x27; + stroke + &#x27;&quot; stroke-width=&quot;0.6&quot; opacity=&quot;0.6&quot;/&gt;&#x27;
+        + &#x27;&lt;circle cx=&quot;10&quot; cy=&quot;9&quot; r=&quot;0.8&quot; fill=&quot;&#x27; + stroke + &#x27;&quot; opacity=&quot;0.5&quot;/&gt;&#x27;
+        + &#x27;&lt;circle cx=&quot;10&quot; cy=&quot;13&quot; r=&quot;0.8&quot; fill=&quot;&#x27; + stroke + &#x27;&quot; opacity=&quot;0.5&quot;/&gt;&#x27;
+        + &#x27;&lt;circle cx=&quot;10&quot; cy=&quot;17&quot; r=&quot;0.8&quot; fill=&quot;&#x27; + stroke + &#x27;&quot; opacity=&quot;0.5&quot;/&gt;&#x27;
+        + &#x27;&lt;rect x=&quot;7.5&quot; y=&quot;19&quot; width=&quot;5&quot; height=&quot;2.5&quot; fill=&quot;&#x27; + stroke + &#x27;&quot; opacity=&quot;0.5&quot;/&gt;&#x27;;
+    }
+    if (type === &#x27;passenger&#x27;) {
+      // Cruise/ferry: rows of porthole windows + tall superstructure
+      return &#x27;&#x27;
+        + &#x27;&lt;path d=&quot;M10 1 L16 9 L14 22 L6 22 L4 9 Z&quot; fill=&quot;&#x27; + color + &#x27;&quot; stroke=&quot;&#x27; + stroke + &#x27;&quot; stroke-width=&quot;1.2&quot; stroke-linejoin=&quot;round&quot;/&gt;&#x27;
+        + &#x27;&lt;rect x=&quot;5.5&quot; y=&quot;10&quot; width=&quot;9&quot; height=&quot;9&quot; fill=&quot;#FFFFFF1F&quot; stroke=&quot;&#x27; + stroke + &#x27;&quot; stroke-width=&quot;0.4&quot; rx=&quot;0.5&quot;/&gt;&#x27;
+        + &#x27;&lt;line x1=&quot;5.5&quot; y1=&quot;13&quot; x2=&quot;14.5&quot; y2=&quot;13&quot; stroke=&quot;&#x27; + stroke + &#x27;&quot; stroke-width=&quot;0.3&quot; opacity=&quot;0.7&quot;/&gt;&#x27;
+        + &#x27;&lt;line x1=&quot;5.5&quot; y1=&quot;16&quot; x2=&quot;14.5&quot; y2=&quot;16&quot; stroke=&quot;&#x27; + stroke + &#x27;&quot; stroke-width=&quot;0.3&quot; opacity=&quot;0.7&quot;/&gt;&#x27;
+        + &#x27;&lt;rect x=&quot;9&quot; y=&quot;6&quot; width=&quot;2&quot; height=&quot;4&quot; fill=&quot;&#x27; + stroke + &#x27;&quot; opacity=&quot;0.5&quot;/&gt;&#x27;;
+    }
+    if (type === &#x27;fishing&#x27;) {
+      // Fishing trawler: mast w/ rigging, raised wheelhouse
+      return &#x27;&#x27;
+        + &#x27;&lt;path d=&quot;M10 3 L13 9 L13 19 L11 21 L9 21 L7 19 L7 9 Z&quot; fill=&quot;&#x27; + color + &#x27;&quot; stroke=&quot;&#x27; + stroke + &#x27;&quot; stroke-width=&quot;1.2&quot; stroke-linejoin=&quot;round&quot;/&gt;&#x27;
+        + &#x27;&lt;line x1=&quot;10&quot; y1=&quot;3&quot; x2=&quot;10&quot; y2=&quot;14&quot; stroke=&quot;&#x27; + stroke + &#x27;&quot; stroke-width=&quot;0.7&quot; opacity=&quot;0.7&quot;/&gt;&#x27;
+        + &#x27;&lt;line x1=&quot;8&quot; y1=&quot;6&quot; x2=&quot;12&quot; y2=&quot;6&quot; stroke=&quot;&#x27; + stroke + &#x27;&quot; stroke-width=&quot;0.5&quot; opacity=&quot;0.6&quot;/&gt;&#x27;
+        + &#x27;&lt;rect x=&quot;8&quot; y=&quot;14&quot; width=&quot;4&quot; height=&quot;3&quot; fill=&quot;&#x27; + stroke + &#x27;&quot; opacity=&quot;0.5&quot;/&gt;&#x27;;
+    }
+    if (type === &#x27;tug_pilot&#x27;) {
+      // Tug: short hull, big wheelhouse, stout
+      return &#x27;&#x27;
+        + &#x27;&lt;path d=&quot;M10 3 L15 9 L15 19 L5 19 L5 9 Z&quot; fill=&quot;&#x27; + color + &#x27;&quot; stroke=&quot;&#x27; + stroke + &#x27;&quot; stroke-width=&quot;1.2&quot; stroke-linejoin=&quot;round&quot;/&gt;&#x27;
+        + &#x27;&lt;rect x=&quot;6.5&quot; y=&quot;11&quot; width=&quot;7&quot; height=&quot;6&quot; fill=&quot;#FFFFFF22&quot; stroke=&quot;&#x27; + stroke + &#x27;&quot; stroke-width=&quot;0.5&quot;/&gt;&#x27;
+        + &#x27;&lt;rect x=&quot;9.5&quot; y=&quot;9&quot; width=&quot;1&quot; height=&quot;2&quot; fill=&quot;&#x27; + stroke + &#x27;&quot; opacity=&quot;0.6&quot;/&gt;&#x27;;
+    }
+    if (type === &#x27;pleasure&#x27;) {
+      // Yacht: deck rails + small cabin
+      return &#x27;&#x27;
+        + &#x27;&lt;path d=&quot;M10 5 L14 18 L10 16 L6 18 Z&quot; fill=&quot;&#x27; + color + &#x27;&quot; stroke=&quot;&#x27; + stroke + &#x27;&quot; stroke-width=&quot;1.0&quot; stroke-linejoin=&quot;round&quot;/&gt;&#x27;
+        + &#x27;&lt;line x1=&quot;10&quot; y1=&quot;5&quot; x2=&quot;10&quot; y2=&quot;14&quot; stroke=&quot;&#x27; + stroke + &#x27;&quot; stroke-width=&quot;0.5&quot; opacity=&quot;0.6&quot;/&gt;&#x27;
+        + &#x27;&lt;rect x=&quot;8.5&quot; y=&quot;11.5&quot; width=&quot;3&quot; height=&quot;2.5&quot; fill=&quot;#FFFFFF22&quot; stroke=&quot;&#x27; + stroke + &#x27;&quot; stroke-width=&quot;0.3&quot;/&gt;&#x27;;
+    }
+    // other / fallback: simple arrow
+    return &#x27;&lt;path d=&quot;M10 1 L18 22 L10 17 L2 22 Z&quot; fill=&quot;&#x27; + color + &#x27;&quot; stroke=&quot;&#x27; + stroke + &#x27;&quot; stroke-width=&quot;1.2&quot; stroke-linejoin=&quot;round&quot;/&gt;&#x27;
+      + &#x27;&lt;circle cx=&quot;10&quot; cy=&quot;14&quot; r=&quot;1.4&quot; fill=&quot;&#x27; + stroke + &#x27;&quot; opacity=&quot;0.55&quot;/&gt;&#x27;;
+  }
+
+  // Directional arrow-style SVG, rotated by heading.
+  // `extraScale` (optional) scales the entire icon by zoom level. When &gt;= 2.0
+  // we render the detailed per-type silhouette with deck features.
   function shipSvg(color, heading, active, moored, shipType, extraScale) {
     var rot = heading === null || heading === undefined ? 0 : heading;
     var stroke = active ? &#x27;#22D3EE&#x27; : &#x27;#080A11&#x27;;
@@ -853,7 +919,6 @@ input::-webkit-search-cancel-button,input::-webkit-search-decoration,input::-web
     var size = Math.round((active ? 26 : 18) * scale);
     var h = Math.round(size * 1.2);
     if (moored) {
-      // Circular stationary indicator (for moored/anchored vessels with no heading)
       var s = Math.max(10, Math.round(size * 0.9));
       return &#x27;&lt;div class=&quot;ship-icon&quot; style=&quot;width:&#x27; + s + &#x27;px; height:&#x27; + s + &#x27;px;&quot;&gt;&#x27; +
         &#x27;&lt;svg viewBox=&quot;0 0 20 20&quot; width=&quot;&#x27; + s + &#x27;&quot; height=&quot;&#x27; + s + &#x27;&quot;&gt;&#x27; +
@@ -861,13 +926,14 @@ input::-webkit-search-cancel-button,input::-webkit-search-decoration,input::-web
         &#x27;&lt;circle cx=&quot;10&quot; cy=&quot;10&quot; r=&quot;2.2&quot; fill=&quot;&#x27; + stroke + &#x27;&quot; opacity=&quot;0.55&quot; /&gt;&#x27; +
         &#x27;&lt;/svg&gt;&#x27; + (active ? &#x27;&lt;div class=&quot;active-ring&quot;&gt;&lt;/div&gt;&#x27; : &#x27;&#x27;) + &#x27;&lt;/div&gt;&#x27;;
     }
-    var path = SHIP_PATHS[shipType] || SHIP_PATHS.other;
-    // Bow-up silhouette, rotated by heading. Small central dot for visual weight.
+    var detailed = z &gt;= 2.0;
+    var inner = detailed
+      ? detailedSvg(color, stroke, shipType)
+      : &#x27;&lt;path d=&quot;&#x27; + (SHIP_PATHS[shipType] || SHIP_PATHS.other) + &#x27;&quot; fill=&quot;&#x27; + color + &#x27;&quot; stroke=&quot;&#x27; + stroke + &#x27;&quot; stroke-width=&quot;1.3&quot; stroke-linejoin=&quot;round&quot;/&gt;&#x27;
+        + &#x27;&lt;circle cx=&quot;10&quot; cy=&quot;14&quot; r=&quot;1.4&quot; fill=&quot;&#x27; + stroke + &#x27;&quot; opacity=&quot;0.55&quot;/&gt;&#x27;;
     return &#x27;&lt;div class=&quot;ship-icon&quot; style=&quot;transform:rotate(&#x27; + rot + &#x27;deg); width:&#x27; + size + &#x27;px; height:&#x27; + h + &#x27;px;&quot;&gt;&#x27; +
       &#x27;&lt;svg viewBox=&quot;0 0 20 24&quot; width=&quot;&#x27; + size + &#x27;&quot; height=&quot;&#x27; + h + &#x27;&quot;&gt;&#x27; +
-      &#x27;&lt;path d=&quot;&#x27; + path + &#x27;&quot; &#x27; +
-      &#x27;fill=&quot;&#x27; + color + &#x27;&quot; stroke=&quot;&#x27; + stroke + &#x27;&quot; stroke-width=&quot;1.3&quot; stroke-linejoin=&quot;round&quot;/&gt;&#x27; +
-      &#x27;&lt;circle cx=&quot;10&quot; cy=&quot;14&quot; r=&quot;1.4&quot; fill=&quot;&#x27; + stroke + &#x27;&quot; opacity=&quot;0.55&quot;/&gt;&#x27; +
+      inner +
       &#x27;&lt;/svg&gt;&#x27; +
       (active ? &#x27;&lt;div class=&quot;active-ring&quot;&gt;&lt;/div&gt;&#x27; : &#x27;&#x27;) +
       &#x27;&lt;/div&gt;&#x27;;
@@ -955,8 +1021,40 @@ input::-webkit-search-cancel-button,input::-webkit-search-decoration,input::-web
       var size = Math.round((active ? 26 : 18) * zScale);
       var icon = L.divIcon({ className: &#x27;&#x27;, html: html, iconSize: [size, size], iconAnchor: [size/2, size/2] });
       if (markers[v.mmsi]) {
-        markers[v.mmsi].setLatLng([v.latitude, v.longitude]);
-        markers[v.mmsi].setIcon(icon);
+        // Smooth movement: tween marker position from where it currently is
+        // to the newly-reported (lat, lng) over ~3.5s. Avoids the &quot;teleport&quot;
+        // effect between API polls — vessels glide instead. Each marker keeps
+        // a single rAF id so a new poll cancels any in-flight tween cleanly.
+        var m = markers[v.mmsi];
+        m.setIcon(icon);
+        var from = m.getLatLng();
+        var toLat = v.latitude;
+        var toLng = v.longitude;
+        // Skip the tween if movement is tiny (jitter) or huge (teleport
+        // suggesting AIS jump &gt; 50nm — better to snap than slide for a long time)
+        var dLat = toLat - from.lat;
+        var dLng = toLng - from.lng;
+        var dist = Math.sqrt(dLat*dLat + dLng*dLng);
+        if (m._tweenId) { cancelAnimationFrame(m._tweenId); m._tweenId = null; }
+        if (dist &lt; 0.00005 || dist &gt; 0.8) {
+          m.setLatLng([toLat, toLng]);
+        } else {
+          var startLat = from.lat;
+          var startLng = from.lng;
+          var t0 = performance.now();
+          var dur = 3500; // ms
+          (function tween(now) {
+            var t = Math.min(1, (now - t0) / dur);
+            // ease-in-out cubic
+            var e = t &lt; 0.5 ? 4*t*t*t : 1 - Math.pow(-2*t + 2, 3) / 2;
+            m.setLatLng([startLat + dLat * e, startLng + dLng * e]);
+            if (t &lt; 1) {
+              m._tweenId = requestAnimationFrame(tween);
+            } else {
+              m._tweenId = null;
+            }
+          })(t0);
+        }
       } else {
         (function(vv) {
           var m = L.marker([vv.latitude, vv.longitude], { icon: icon });
@@ -1249,5 +1347,5 @@ input::-webkit-search-cancel-button,input::-webkit-search-decoration,input::-web
   post({ type: &#x27;ready&#x27; });
 &lt;/script&gt;
 &lt;/body&gt;
-&lt;/html&gt;" style="width:100%;height:100%;border:0;background:#080A11" sandbox="allow-scripts allow-same-origin"></iframe></div><div class="css-g5y9jx r-1d2f490 r-u8s1d r-zchlnj r-ipm5af" style="pointer-events:box-none;padding-top:0px;padding-right:0px;padding-bottom:0px;padding-left:0px"><div class="css-g5y9jx r-1awozwy r-18u37iz r-ojf8lh r-1wtj0ep r-3pj75a r-tskmnb" style="pointer-events:box-none"><div class="css-g5y9jx r-1awozwy r-1lma4rq r-uj8ox2 r-cpet4d r-rs99b7 r-18u37iz r-vuvdlw r-3o4zer" data-testid="connection-status"><div class="css-g5y9jx r-z2wwpe r-3da1kt r-1pcdyqj r-1jg9483" style="background-color:rgba(100,106,131,1.00);opacity:1"></div><div dir="auto" class="css-146c3p1 r-jwli3a r-1gkfh8e r-b88u0q r-19r33im">…</div><div dir="auto" class="css-146c3p1 r-lc1vks r-1gkfh8e r-1kfrs79 r-13hce6t">· <!-- -->0</div></div><div class="css-g5y9jx r-18u37iz r-ojf8lh"><div aria-label="Map layers and overlays" tabindex="0" class="css-g5y9jx r-1i6wzkk r-lrvibr r-1loqt21 r-1otgn73 r-1awozwy r-1lma4rq r-uj8ox2 r-cpet4d r-rs99b7 r-18u37iz r-9aw3ui r-vuvdlw r-1ubuhtd" style="transition-duration:0s" data-testid="layers-toggle"><div dir="auto" class="css-146c3p1 r-lrvibr" style="font-size:14px;color:rgba(34,211,238,1.00);font-family:ionicons;font-weight:normal;font-style:normal"></div><div dir="auto" class="css-146c3p1 r-jwli3a r-1gkfh8e r-b88u0q r-ud0q2t">LAYERS</div></div></div></div></div><div class="css-g5y9jx r-1kihuf0 r-1lma4rq r-cpet4d r-1jd5jdk r-xyw6el r-u8s1d" style="pointer-events:none"><div role="progressbar" aria-valuemax="1" aria-valuemin="0" class="css-g5y9jx r-1awozwy r-1777fci"><div class="css-g5y9jx r-z80fyv r-19wmn03 r-17bb2tj r-1muvv40 r-1yef0xd r-1ldzwu0"><svg height="100%" viewBox="0 0 32 32" width="100%"><circle cx="16" cy="16" fill="none" r="14" stroke-width="4" style="stroke:#22D3EE;opacity:0.2"></circle><circle cx="16" cy="16" fill="none" r="14" stroke-width="4" style="stroke:#22D3EE;stroke-dasharray:80;stroke-dashoffset:60"></circle></svg></div></div></div><div class="css-g5y9jx r-1ie7cc1 r-uj8ox2 r-1ljd8xs r-13l2t4g r-f1w8kp r-cqzzvf r-5kkj8d r-1p0dtai r-1d2f490 r-u8s1d r-zchlnj" style="pointer-events:none;transform:translateY(300px)" data-testid="vessel-sheet"><div class="css-g5y9jx r-1kihuf0 r-wimq9i r-1jkafct r-hdaws3 r-knv0ih r-1acpoxo"></div></div><div class="css-g5y9jx r-1ie7cc1 r-uj8ox2 r-1ljd8xs r-13l2t4g r-f1w8kp r-cqzzvf r-5kkj8d r-1p0dtai r-1d2f490 r-u8s1d r-zchlnj" style="pointer-events:none;transform:translateY(400px)" data-testid="port-sheet"><div class="css-g5y9jx r-1kihuf0 r-wimq9i r-1jkafct r-hdaws3 r-knv0ih r-1acpoxo"></div></div><div class="css-g5y9jx r-1ie7cc1 r-uj8ox2 r-1ljd8xs r-13l2t4g r-f1w8kp r-cqzzvf r-5kkj8d r-1p0dtai r-1d2f490 r-u8s1d r-zchlnj" style="pointer-events:none;transform:translateY(500px)" data-testid="layers-sheet"><div class="css-g5y9jx r-1kihuf0 r-wimq9i r-1jkafct r-hdaws3 r-knv0ih r-1acpoxo"></div></div><div aria-label="Show ships near me" tabindex="0" class="css-g5y9jx r-1i6wzkk r-lrvibr r-1loqt21 r-1otgn73 r-1awozwy r-1ie7cc1 r-1vdxzqr r-1fuqb1j r-rs99b7 r-10nujdq r-h3s6tt r-1777fci r-u8s1d r-e1k2in r-rwqe4o" style="transition-duration:0s" data-testid="near-me-btn"><div dir="auto" class="css-146c3p1 r-lrvibr" style="font-size:22px;color:rgba(34,211,238,1.00);font-family:ionicons;font-weight:normal;font-style:normal"></div></div></div><!--/$--></div></div></div></div><div class="css-g5y9jx r-1p0dtai r-zchlnj r-1d2f490 r-105ug2t" style="border-right-color:rgba(216,216,216,1.00);border-bottom-color:rgba(216,216,216,1.00);border-left-color:rgba(216,216,216,1.00);padding-right:0px;padding-left:0px;background-color:rgba(8,10,17,1.00);border-top-color:rgba(42,47,69,1.00);border-top-width:1px;height:64px;padding-top:8px;padding-bottom:8px;transform:translateY(0px)"><div class="css-g5y9jx r-1p0dtai r-1d2f490 r-u8s1d r-zchlnj r-ipm5af r-633pao"></div><div role="tablist" class="css-g5y9jx r-13awgt0 r-18u37iz"><div class="css-g5y9jx r-13awgt0" style="border-top-left-radius:0px;border-top-right-radius:0px;border-bottom-right-radius:0px;border-bottom-left-radius:0px;overflow-x:visible;overflow-y:visible"><a href="/" role="tab" aria-selected="true" tabindex="0" class="css-g5y9jx r-1otgn73 r-1awozwy r-1onu96p r-eqz5dr r-1h0z5md r-1uu6nss" style="cursor:pointer;flex:1;background-color:rgba(0,0,0,0.00);border-top-left-radius:0px;border-top-right-radius:0px;border-bottom-right-radius:0px;border-bottom-left-radius:0px;opacity:1"><div class="css-g5y9jx r-h0d30l r-726pan"><div class="css-g5y9jx r-1awozwy r-1kihuf0 r-1pi2tsx r-1777fci r-u8s1d r-13qz1uu" style="opacity:1;min-width:25px"><div dir="auto" class="css-146c3p1 r-lrvibr" style="font-size:25px;color:rgba(34,211,238,1.00);font-family:ionicons;font-weight:normal;font-style:normal"></div></div><div class="css-g5y9jx r-1awozwy r-1kihuf0 r-1pi2tsx r-1777fci r-u8s1d r-13qz1uu" style="opacity:0"><div dir="auto" class="css-146c3p1 r-lrvibr" style="font-size:25px;color:rgba(100,106,131,1.00);font-family:ionicons;font-weight:normal;font-style:normal"></div></div></div><div dir="auto" class="css-146c3p1 r-dnmrzs r-1udh08x r-1udbk01 r-3s2u2q r-1iln25a r-1niwhzg r-q4m81j" style="color:rgba(34,211,238,1.00);font-family:system-ui, &quot;Segoe UI&quot;, Roboto, Helvetica, Arial, sans-serif, &quot;Apple Color Emoji&quot;, &quot;Segoe UI Emoji&quot;, &quot;Segoe UI Symbol&quot;;font-size:11px;font-weight:600;letter-spacing:0.5px">Map</div></a></div><div class="css-g5y9jx r-13awgt0" style="border-top-left-radius:0px;border-top-right-radius:0px;border-bottom-right-radius:0px;border-bottom-left-radius:0px;overflow-x:visible;overflow-y:visible"><a href="/search" role="tab" aria-selected="false" tabindex="0" class="css-g5y9jx r-1otgn73 r-1awozwy r-1onu96p r-eqz5dr r-1h0z5md r-1uu6nss" style="cursor:pointer;flex:1;background-color:rgba(0,0,0,0.00);border-top-left-radius:0px;border-top-right-radius:0px;border-bottom-right-radius:0px;border-bottom-left-radius:0px;opacity:1"><div class="css-g5y9jx r-h0d30l r-726pan"><div class="css-g5y9jx r-1awozwy r-1kihuf0 r-1pi2tsx r-1777fci r-u8s1d r-13qz1uu" style="opacity:0;min-width:25px"><div dir="auto" class="css-146c3p1 r-lrvibr" style="font-size:25px;color:rgba(34,211,238,1.00);font-family:ionicons;font-weight:normal;font-style:normal"></div></div><div class="css-g5y9jx r-1awozwy r-1kihuf0 r-1pi2tsx r-1777fci r-u8s1d r-13qz1uu" style="opacity:1"><div dir="auto" class="css-146c3p1 r-lrvibr" style="font-size:25px;color:rgba(100,106,131,1.00);font-family:ionicons;font-weight:normal;font-style:normal"></div></div></div><div dir="auto" class="css-146c3p1 r-dnmrzs r-1udh08x r-1udbk01 r-3s2u2q r-1iln25a r-1niwhzg r-q4m81j" style="color:rgba(100,106,131,1.00);font-family:system-ui, &quot;Segoe UI&quot;, Roboto, Helvetica, Arial, sans-serif, &quot;Apple Color Emoji&quot;, &quot;Segoe UI Emoji&quot;, &quot;Segoe UI Symbol&quot;;font-size:11px;font-weight:600;letter-spacing:0.5px">Search</div></a></div><div class="css-g5y9jx r-13awgt0" style="border-top-left-radius:0px;border-top-right-radius:0px;border-bottom-right-radius:0px;border-bottom-left-radius:0px;overflow-x:visible;overflow-y:visible"><a href="/favorites" role="tab" aria-selected="false" tabindex="0" class="css-g5y9jx r-1otgn73 r-1awozwy r-1onu96p r-eqz5dr r-1h0z5md r-1uu6nss" style="cursor:pointer;flex:1;background-color:rgba(0,0,0,0.00);border-top-left-radius:0px;border-top-right-radius:0px;border-bottom-right-radius:0px;border-bottom-left-radius:0px;opacity:1"><div class="css-g5y9jx r-h0d30l r-726pan"><div class="css-g5y9jx r-1awozwy r-1kihuf0 r-1pi2tsx r-1777fci r-u8s1d r-13qz1uu" style="opacity:0;min-width:25px"><div dir="auto" class="css-146c3p1 r-lrvibr" style="font-size:25px;color:rgba(34,211,238,1.00);font-family:ionicons;font-weight:normal;font-style:normal"></div></div><div class="css-g5y9jx r-1awozwy r-1kihuf0 r-1pi2tsx r-1777fci r-u8s1d r-13qz1uu" style="opacity:1"><div dir="auto" class="css-146c3p1 r-lrvibr" style="font-size:25px;color:rgba(100,106,131,1.00);font-family:ionicons;font-weight:normal;font-style:normal"></div></div></div><div dir="auto" class="css-146c3p1 r-dnmrzs r-1udh08x r-1udbk01 r-3s2u2q r-1iln25a r-1niwhzg r-q4m81j" style="color:rgba(100,106,131,1.00);font-family:system-ui, &quot;Segoe UI&quot;, Roboto, Helvetica, Arial, sans-serif, &quot;Apple Color Emoji&quot;, &quot;Segoe UI Emoji&quot;, &quot;Segoe UI Symbol&quot;;font-size:11px;font-weight:600;letter-spacing:0.5px">Favorites</div></a></div><div class="css-g5y9jx r-13awgt0" style="border-top-left-radius:0px;border-top-right-radius:0px;border-bottom-right-radius:0px;border-bottom-left-radius:0px;overflow-x:visible;overflow-y:visible"><a href="/settings" role="tab" aria-selected="false" tabindex="0" class="css-g5y9jx r-1otgn73 r-1awozwy r-1onu96p r-eqz5dr r-1h0z5md r-1uu6nss" style="cursor:pointer;flex:1;background-color:rgba(0,0,0,0.00);border-top-left-radius:0px;border-top-right-radius:0px;border-bottom-right-radius:0px;border-bottom-left-radius:0px;opacity:1"><div class="css-g5y9jx r-h0d30l r-726pan"><div class="css-g5y9jx r-1awozwy r-1kihuf0 r-1pi2tsx r-1777fci r-u8s1d r-13qz1uu" style="opacity:0;min-width:25px"><div dir="auto" class="css-146c3p1 r-lrvibr" style="font-size:25px;color:rgba(34,211,238,1.00);font-family:ionicons;font-weight:normal;font-style:normal"></div></div><div class="css-g5y9jx r-1awozwy r-1kihuf0 r-1pi2tsx r-1777fci r-u8s1d r-13qz1uu" style="opacity:1"><div dir="auto" class="css-146c3p1 r-lrvibr" style="font-size:25px;color:rgba(100,106,131,1.00);font-family:ionicons;font-weight:normal;font-style:normal"></div></div></div><div dir="auto" class="css-146c3p1 r-dnmrzs r-1udh08x r-1udbk01 r-3s2u2q r-1iln25a r-1niwhzg r-q4m81j" style="color:rgba(100,106,131,1.00);font-family:system-ui, &quot;Segoe UI&quot;, Roboto, Helvetica, Arial, sans-serif, &quot;Apple Color Emoji&quot;, &quot;Segoe UI Emoji&quot;, &quot;Segoe UI Symbol&quot;;font-size:11px;font-weight:600;letter-spacing:0.5px">Settings</div></a></div></div></div></div><!--/$--></div></div></div></div></div></div></div><!--/$--></div></div><script src="/_expo/static/js/web/entry-5960a663cb0c8c570075c6113e03bf71.js" defer></script>
+&lt;/html&gt;" style="width:100%;height:100%;border:0;background:#080A11" sandbox="allow-scripts allow-same-origin"></iframe></div><div class="css-g5y9jx r-1d2f490 r-u8s1d r-zchlnj r-ipm5af" style="pointer-events:box-none;padding-top:0px;padding-right:0px;padding-bottom:0px;padding-left:0px"><div class="css-g5y9jx r-1awozwy r-18u37iz r-ojf8lh r-1wtj0ep r-3pj75a r-tskmnb" style="pointer-events:box-none"><div class="css-g5y9jx r-1awozwy r-1lma4rq r-uj8ox2 r-cpet4d r-rs99b7 r-18u37iz r-vuvdlw r-3o4zer" data-testid="connection-status"><div class="css-g5y9jx r-z2wwpe r-3da1kt r-1pcdyqj r-1jg9483" style="background-color:rgba(100,106,131,1.00);opacity:1"></div><div dir="auto" class="css-146c3p1 r-jwli3a r-1gkfh8e r-b88u0q r-19r33im">…</div><div dir="auto" class="css-146c3p1 r-lc1vks r-1gkfh8e r-1kfrs79 r-13hce6t">· <!-- -->0</div></div><div class="css-g5y9jx r-18u37iz r-ojf8lh"><div aria-label="Map layers and overlays" tabindex="0" class="css-g5y9jx r-1i6wzkk r-lrvibr r-1loqt21 r-1otgn73 r-1awozwy r-1lma4rq r-uj8ox2 r-cpet4d r-rs99b7 r-18u37iz r-9aw3ui r-vuvdlw r-1ubuhtd" style="transition-duration:0s" data-testid="layers-toggle"><div dir="auto" class="css-146c3p1 r-lrvibr" style="font-size:14px;color:rgba(34,211,238,1.00);font-family:ionicons;font-weight:normal;font-style:normal"></div><div dir="auto" class="css-146c3p1 r-jwli3a r-1gkfh8e r-b88u0q r-ud0q2t">LAYERS</div></div></div></div></div><div class="css-g5y9jx r-1kihuf0 r-1lma4rq r-cpet4d r-1jd5jdk r-xyw6el r-u8s1d" style="pointer-events:none"><div role="progressbar" aria-valuemax="1" aria-valuemin="0" class="css-g5y9jx r-1awozwy r-1777fci"><div class="css-g5y9jx r-z80fyv r-19wmn03 r-17bb2tj r-1muvv40 r-1yef0xd r-1ldzwu0"><svg height="100%" viewBox="0 0 32 32" width="100%"><circle cx="16" cy="16" fill="none" r="14" stroke-width="4" style="stroke:#22D3EE;opacity:0.2"></circle><circle cx="16" cy="16" fill="none" r="14" stroke-width="4" style="stroke:#22D3EE;stroke-dasharray:80;stroke-dashoffset:60"></circle></svg></div></div></div><div class="css-g5y9jx r-1ie7cc1 r-uj8ox2 r-1ljd8xs r-13l2t4g r-f1w8kp r-cqzzvf r-5kkj8d r-1p0dtai r-1d2f490 r-u8s1d r-zchlnj" style="pointer-events:none;transform:translateY(300px)" data-testid="vessel-sheet"><div class="css-g5y9jx r-1kihuf0 r-wimq9i r-1jkafct r-hdaws3 r-knv0ih r-1acpoxo"></div></div><div class="css-g5y9jx r-1ie7cc1 r-uj8ox2 r-1ljd8xs r-13l2t4g r-f1w8kp r-cqzzvf r-5kkj8d r-1p0dtai r-1d2f490 r-u8s1d r-zchlnj" style="pointer-events:none;transform:translateY(400px)" data-testid="port-sheet"><div class="css-g5y9jx r-1kihuf0 r-wimq9i r-1jkafct r-hdaws3 r-knv0ih r-1acpoxo"></div></div><div class="css-g5y9jx r-1ie7cc1 r-uj8ox2 r-1ljd8xs r-13l2t4g r-f1w8kp r-cqzzvf r-5kkj8d r-1p0dtai r-1d2f490 r-u8s1d r-zchlnj" style="pointer-events:none;transform:translateY(500px)" data-testid="layers-sheet"><div class="css-g5y9jx r-1kihuf0 r-wimq9i r-1jkafct r-hdaws3 r-knv0ih r-1acpoxo"></div></div><div aria-label="Show ships near me" tabindex="0" class="css-g5y9jx r-1i6wzkk r-lrvibr r-1loqt21 r-1otgn73 r-1awozwy r-1ie7cc1 r-1vdxzqr r-1fuqb1j r-rs99b7 r-10nujdq r-h3s6tt r-1777fci r-u8s1d r-e1k2in r-rwqe4o" style="transition-duration:0s" data-testid="near-me-btn"><div dir="auto" class="css-146c3p1 r-lrvibr" style="font-size:22px;color:rgba(34,211,238,1.00);font-family:ionicons;font-weight:normal;font-style:normal"></div></div></div><!--/$--></div></div></div></div><div class="css-g5y9jx r-1p0dtai r-zchlnj r-1d2f490 r-105ug2t" style="border-right-color:rgba(216,216,216,1.00);border-bottom-color:rgba(216,216,216,1.00);border-left-color:rgba(216,216,216,1.00);padding-right:0px;padding-left:0px;background-color:rgba(8,10,17,1.00);border-top-color:rgba(42,47,69,1.00);border-top-width:1px;height:64px;padding-top:8px;padding-bottom:8px;transform:translateY(0px)"><div class="css-g5y9jx r-1p0dtai r-1d2f490 r-u8s1d r-zchlnj r-ipm5af r-633pao"></div><div role="tablist" class="css-g5y9jx r-13awgt0 r-18u37iz"><div class="css-g5y9jx r-13awgt0" style="border-top-left-radius:0px;border-top-right-radius:0px;border-bottom-right-radius:0px;border-bottom-left-radius:0px;overflow-x:visible;overflow-y:visible"><a href="/" role="tab" aria-selected="true" tabindex="0" class="css-g5y9jx r-1otgn73 r-1awozwy r-1onu96p r-eqz5dr r-1h0z5md r-1uu6nss" style="cursor:pointer;flex:1;background-color:rgba(0,0,0,0.00);border-top-left-radius:0px;border-top-right-radius:0px;border-bottom-right-radius:0px;border-bottom-left-radius:0px;opacity:1"><div class="css-g5y9jx r-h0d30l r-726pan"><div class="css-g5y9jx r-1awozwy r-1kihuf0 r-1pi2tsx r-1777fci r-u8s1d r-13qz1uu" style="opacity:1;min-width:25px"><div dir="auto" class="css-146c3p1 r-lrvibr" style="font-size:25px;color:rgba(34,211,238,1.00);font-family:ionicons;font-weight:normal;font-style:normal"></div></div><div class="css-g5y9jx r-1awozwy r-1kihuf0 r-1pi2tsx r-1777fci r-u8s1d r-13qz1uu" style="opacity:0"><div dir="auto" class="css-146c3p1 r-lrvibr" style="font-size:25px;color:rgba(100,106,131,1.00);font-family:ionicons;font-weight:normal;font-style:normal"></div></div></div><div dir="auto" class="css-146c3p1 r-dnmrzs r-1udh08x r-1udbk01 r-3s2u2q r-1iln25a r-1niwhzg r-q4m81j" style="color:rgba(34,211,238,1.00);font-family:system-ui, &quot;Segoe UI&quot;, Roboto, Helvetica, Arial, sans-serif, &quot;Apple Color Emoji&quot;, &quot;Segoe UI Emoji&quot;, &quot;Segoe UI Symbol&quot;;font-size:11px;font-weight:600;letter-spacing:0.5px">Map</div></a></div><div class="css-g5y9jx r-13awgt0" style="border-top-left-radius:0px;border-top-right-radius:0px;border-bottom-right-radius:0px;border-bottom-left-radius:0px;overflow-x:visible;overflow-y:visible"><a href="/search" role="tab" aria-selected="false" tabindex="0" class="css-g5y9jx r-1otgn73 r-1awozwy r-1onu96p r-eqz5dr r-1h0z5md r-1uu6nss" style="cursor:pointer;flex:1;background-color:rgba(0,0,0,0.00);border-top-left-radius:0px;border-top-right-radius:0px;border-bottom-right-radius:0px;border-bottom-left-radius:0px;opacity:1"><div class="css-g5y9jx r-h0d30l r-726pan"><div class="css-g5y9jx r-1awozwy r-1kihuf0 r-1pi2tsx r-1777fci r-u8s1d r-13qz1uu" style="opacity:0;min-width:25px"><div dir="auto" class="css-146c3p1 r-lrvibr" style="font-size:25px;color:rgba(34,211,238,1.00);font-family:ionicons;font-weight:normal;font-style:normal"></div></div><div class="css-g5y9jx r-1awozwy r-1kihuf0 r-1pi2tsx r-1777fci r-u8s1d r-13qz1uu" style="opacity:1"><div dir="auto" class="css-146c3p1 r-lrvibr" style="font-size:25px;color:rgba(100,106,131,1.00);font-family:ionicons;font-weight:normal;font-style:normal"></div></div></div><div dir="auto" class="css-146c3p1 r-dnmrzs r-1udh08x r-1udbk01 r-3s2u2q r-1iln25a r-1niwhzg r-q4m81j" style="color:rgba(100,106,131,1.00);font-family:system-ui, &quot;Segoe UI&quot;, Roboto, Helvetica, Arial, sans-serif, &quot;Apple Color Emoji&quot;, &quot;Segoe UI Emoji&quot;, &quot;Segoe UI Symbol&quot;;font-size:11px;font-weight:600;letter-spacing:0.5px">Search</div></a></div><div class="css-g5y9jx r-13awgt0" style="border-top-left-radius:0px;border-top-right-radius:0px;border-bottom-right-radius:0px;border-bottom-left-radius:0px;overflow-x:visible;overflow-y:visible"><a href="/favorites" role="tab" aria-selected="false" tabindex="0" class="css-g5y9jx r-1otgn73 r-1awozwy r-1onu96p r-eqz5dr r-1h0z5md r-1uu6nss" style="cursor:pointer;flex:1;background-color:rgba(0,0,0,0.00);border-top-left-radius:0px;border-top-right-radius:0px;border-bottom-right-radius:0px;border-bottom-left-radius:0px;opacity:1"><div class="css-g5y9jx r-h0d30l r-726pan"><div class="css-g5y9jx r-1awozwy r-1kihuf0 r-1pi2tsx r-1777fci r-u8s1d r-13qz1uu" style="opacity:0;min-width:25px"><div dir="auto" class="css-146c3p1 r-lrvibr" style="font-size:25px;color:rgba(34,211,238,1.00);font-family:ionicons;font-weight:normal;font-style:normal"></div></div><div class="css-g5y9jx r-1awozwy r-1kihuf0 r-1pi2tsx r-1777fci r-u8s1d r-13qz1uu" style="opacity:1"><div dir="auto" class="css-146c3p1 r-lrvibr" style="font-size:25px;color:rgba(100,106,131,1.00);font-family:ionicons;font-weight:normal;font-style:normal"></div></div></div><div dir="auto" class="css-146c3p1 r-dnmrzs r-1udh08x r-1udbk01 r-3s2u2q r-1iln25a r-1niwhzg r-q4m81j" style="color:rgba(100,106,131,1.00);font-family:system-ui, &quot;Segoe UI&quot;, Roboto, Helvetica, Arial, sans-serif, &quot;Apple Color Emoji&quot;, &quot;Segoe UI Emoji&quot;, &quot;Segoe UI Symbol&quot;;font-size:11px;font-weight:600;letter-spacing:0.5px">Favorites</div></a></div><div class="css-g5y9jx r-13awgt0" style="border-top-left-radius:0px;border-top-right-radius:0px;border-bottom-right-radius:0px;border-bottom-left-radius:0px;overflow-x:visible;overflow-y:visible"><a href="/settings" role="tab" aria-selected="false" tabindex="0" class="css-g5y9jx r-1otgn73 r-1awozwy r-1onu96p r-eqz5dr r-1h0z5md r-1uu6nss" style="cursor:pointer;flex:1;background-color:rgba(0,0,0,0.00);border-top-left-radius:0px;border-top-right-radius:0px;border-bottom-right-radius:0px;border-bottom-left-radius:0px;opacity:1"><div class="css-g5y9jx r-h0d30l r-726pan"><div class="css-g5y9jx r-1awozwy r-1kihuf0 r-1pi2tsx r-1777fci r-u8s1d r-13qz1uu" style="opacity:0;min-width:25px"><div dir="auto" class="css-146c3p1 r-lrvibr" style="font-size:25px;color:rgba(34,211,238,1.00);font-family:ionicons;font-weight:normal;font-style:normal"></div></div><div class="css-g5y9jx r-1awozwy r-1kihuf0 r-1pi2tsx r-1777fci r-u8s1d r-13qz1uu" style="opacity:1"><div dir="auto" class="css-146c3p1 r-lrvibr" style="font-size:25px;color:rgba(100,106,131,1.00);font-family:ionicons;font-weight:normal;font-style:normal"></div></div></div><div dir="auto" class="css-146c3p1 r-dnmrzs r-1udh08x r-1udbk01 r-3s2u2q r-1iln25a r-1niwhzg r-q4m81j" style="color:rgba(100,106,131,1.00);font-family:system-ui, &quot;Segoe UI&quot;, Roboto, Helvetica, Arial, sans-serif, &quot;Apple Color Emoji&quot;, &quot;Segoe UI Emoji&quot;, &quot;Segoe UI Symbol&quot;;font-size:11px;font-weight:600;letter-spacing:0.5px">Settings</div></a></div></div></div></div><!--/$--></div></div></div></div></div></div></div><!--/$--></div></div><script src="/_expo/static/js/web/entry-7be92ed73df3ced92c342817be1414aa.js" defer></script>
 </body></html>

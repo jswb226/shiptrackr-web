@@ -1,0 +1,138 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<title>ShipTrackr Changelog</title>
+<style>
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+  body {
+    width: 1080px; min-height: 1350px;
+    background:
+      radial-gradient(ellipse at 80% -10%, rgba(34,211,238,0.18), transparent 60%),
+      radial-gradient(ellipse at -10% 80%, rgba(255,210,92,0.12), transparent 60%),
+      linear-gradient(180deg, #0B203F 0%, #07142a 100%);
+    color: #ECEFF7;
+    font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", Roboto, sans-serif;
+    padding: 64px 56px;
+    position: relative; overflow: hidden;
+  }
+  body::before {
+    content: ''; position: absolute; inset: 0; pointer-events: none; opacity: 0.07;
+    background-image:
+      linear-gradient(to right, #22D3EE 1px, transparent 1px),
+      linear-gradient(to bottom, #22D3EE 1px, transparent 1px);
+    background-size: 60px 60px;
+  }
+  .header { display: flex; align-items: center; gap: 18px; margin-bottom: 12px; }
+  .logo {
+    width: 72px; height: 72px; border-radius: 18px;
+    background: linear-gradient(135deg, #22D3EE 0%, #0EA5E9 100%);
+    display: flex; align-items: center; justify-content: center;
+    box-shadow: 0 8px 28px rgba(34,211,238,0.45), inset 0 0 0 2px rgba(255,255,255,0.12);
+  }
+  .logo svg { width: 44px; height: 44px; }
+  .brand h1 {
+    margin: 0; font-size: 44px; font-weight: 800; letter-spacing: -0.5px;
+    background: linear-gradient(180deg, #ffffff 30%, #93c8d6 100%);
+    -webkit-background-clip: text; background-clip: text; color: transparent;
+  }
+  .brand .tag { color: #93c8d6; letter-spacing: 4px; font-size: 12px; font-weight: 700; text-transform: uppercase; }
+  .titlewrap { margin-top: 36px; }
+  .titlewrap h2 {
+    margin: 0; font-size: 64px; font-weight: 900; letter-spacing: -1.2px; line-height: 1.05;
+  }
+  .titlewrap h2 em { font-style: normal; color: #22D3EE; }
+  .titlewrap .meta { margin-top: 14px; color: #93c8d6; font-size: 16px; letter-spacing: 0.8px; }
+  .titlewrap .meta .pill {
+    display: inline-block; padding: 4px 10px; margin-right: 10px;
+    background: rgba(34,211,238,0.13); color: #22D3EE; border: 1px solid rgba(34,211,238,0.45);
+    border-radius: 999px; font-size: 11px; font-weight: 800; letter-spacing: 1px;
+  }
+  .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 22px; margin-top: 44px; }
+  .card {
+    background: rgba(13,29,57,0.72);
+    border: 1px solid rgba(34,211,238,0.22);
+    border-radius: 22px; padding: 22px 22px 20px;
+  }
+  .card .row { display: flex; align-items: flex-start; gap: 14px; }
+  .card .ico {
+    flex: 0 0 44px; width: 44px; height: 44px; border-radius: 12px;
+    background: rgba(34,211,238,0.10); border: 1px solid rgba(34,211,238,0.40);
+    display: flex; align-items: center; justify-content: center; font-size: 22px;
+  }
+  .card h3 { margin: 0; font-size: 17px; letter-spacing: -0.2px; font-weight: 800; }
+  .card p { margin: 4px 0 0; color: #B8BFD2; font-size: 13.5px; line-height: 1.5; }
+  .bigfeat {
+    margin-top: 28px;
+    background: linear-gradient(135deg, rgba(34,211,238,0.16) 0%, rgba(34,211,238,0.04) 100%), rgba(13,29,57,0.78);
+    border: 1px solid rgba(34,211,238,0.45);
+    border-radius: 26px; padding: 26px 28px;
+    display: flex; align-items: center; gap: 22px;
+  }
+  .bigfeat .num {
+    flex: 0 0 92px; height: 92px; width: 92px; border-radius: 22px;
+    background: linear-gradient(135deg, #22D3EE 0%, #0EA5E9 100%);
+    color: #07142a; font-weight: 900; font-size: 36px;
+    display: flex; align-items: center; justify-content: center;
+    box-shadow: 0 10px 28px rgba(34,211,238,0.45);
+  }
+  .bigfeat h3 { margin: 0; font-size: 24px; font-weight: 900; letter-spacing: -0.3px; }
+  .bigfeat p { margin: 6px 0 0; color: #B8BFD2; font-size: 14px; line-height: 1.55; }
+  .stats { margin-top: 28px; display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; }
+  .stat {
+    background: rgba(13,29,57,0.6); border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 18px; padding: 16px 14px; text-align: center;
+  }
+  .stat .v { font-size: 28px; font-weight: 900; color: #22D3EE; letter-spacing: -0.5px; }
+  .stat .l { font-size: 11px; color: #93c8d6; letter-spacing: 1.5px; font-weight: 700; text-transform: uppercase; margin-top: 4px; }
+  .footer { margin-top: 38px; display: flex; justify-content: space-between; color: #6E7B95; font-size: 12px; letter-spacing: 1px; }
+</style>
+</head>
+<body>
+  <div class="header">
+    <div class="logo">
+      <svg viewBox="0 0 24 24" fill="#07142a">
+        <path d="M12 2 L20 8 L18 22 L6 22 L4 8 Z" stroke="#07142a" stroke-width="0.6" stroke-linejoin="round"/>
+        <rect x="8" y="11" width="8" height="6" fill="#FFFFFF" opacity="0.4"/>
+      </svg>
+    </div>
+    <div class="brand">
+      <div class="tag">Changelog &middot; Build 1.0</div>
+      <h1>ShipTrackr</h1>
+    </div>
+  </div>
+  <div class="titlewrap">
+    <h2>Now sailing<br/><em>worldwide.</em></h2>
+    <div class="meta">
+      <span class="pill">RELEASE 1.0</span>
+      <span>Live worldwide AIS &middot; 16k+ vessels &middot; 214 ports</span>
+    </div>
+  </div>
+  <div class="bigfeat">
+    <div class="num">&#127757;</div>
+    <div>
+      <h3>Worldwide vessel coverage</h3>
+      <p>The bounding box now spans the entire globe (-90/-180 to 90/180). 16,000+ live vessels stream from AISStream.io, with viewport-based fetching so the map only loads what you're looking at.</p>
+    </div>
+  </div>
+  <div class="grid">
+    <div class="card"><div class="row"><div class="ico">&#9875;</div><div><h3>214 worldwide ports</h3><p>Major hubs from Shanghai &amp; Singapore to LA, Rotterdam, Cape Town &amp; Sydney clustered with anchor-amber bubbles at low zoom.</p></div></div></div>
+    <div class="card"><div class="row"><div class="ico">&#128674;</div><div><h3>Detailed ship silhouettes</h3><p>Zoom in to see realistic per-type vessel art: container stacks on cargo, manifolds on tankers, cruise-liner windows on passenger ferries.</p></div></div></div>
+    <div class="card"><div class="row"><div class="ico">&#10024;</div><div><h3>Smooth marker movement</h3><p>Vessels glide between AIS updates with ease-in-out motion instead of teleporting &mdash; the map feels alive.</p></div></div></div>
+    <div class="card"><div class="row"><div class="ico">&#127912;</div><div><h3>Color-coded filter polish</h3><p>Selected vessel-type chips light up in their actual color (cargo green, tanker red, passenger blue) with a subtle glow.</p></div></div></div>
+    <div class="card"><div class="row"><div class="ico">&#128270;</div><div><h3>Search UX upgrade</h3><p>Type-filter pills, "Show on map" deep-links that fly straight to the vessel, worldwide subtitle, and richer empty states.</p></div></div></div>
+    <div class="card"><div class="row"><div class="ico">&#128737;</div><div><h3>Privacy &amp; AIS disclaimer</h3><p>Zero analytics, zero tracking, location stays on-device. AIS data disclaimer added to About &mdash; informational use only.</p></div></div></div>
+  </div>
+  <div class="stats">
+    <div class="stat"><div class="v">16k+</div><div class="l">live vessels</div></div>
+    <div class="stat"><div class="v">214</div><div class="l">world ports</div></div>
+    <div class="stat"><div class="v">&infin;</div><div class="l">global bbox</div></div>
+    <div class="stat"><div class="v">3.5s</div><div class="l">marker tween</div></div>
+  </div>
+  <div class="footer">
+    <span>shiptrackr.vercel.app</span>
+    <span>Real-time AIS &middot; jswb226/shiptrackr</span>
+  </div>
+</body>
+</html>
