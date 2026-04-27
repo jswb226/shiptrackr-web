@@ -26,12 +26,11 @@
   }
   .header { display: flex; align-items: center; gap: 18px; margin-bottom: 12px; }
   .logo {
-    width: 72px; height: 72px; border-radius: 18px;
-    background: linear-gradient(135deg, #22D3EE 0%, #0EA5E9 100%);
-    display: flex; align-items: center; justify-content: center;
-    box-shadow: 0 8px 28px rgba(34,211,238,0.45), inset 0 0 0 2px rgba(255,255,255,0.12);
+    width: 80px; height: 80px; border-radius: 18px;
+    overflow: hidden;
+    box-shadow: 0 8px 28px rgba(34,211,238,0.45), 0 0 0 1px rgba(34,211,238,0.35);
   }
-  .logo svg { width: 44px; height: 44px; }
+  .logo img { display: block; width: 100%; height: 100%; object-fit: cover; }
   .brand h1 {
     margin: 0; font-size: 44px; font-weight: 800; letter-spacing: -0.5px;
     background: linear-gradient(180deg, #ffffff 30%, #93c8d6 100%);
@@ -83,10 +82,7 @@
 <body>
   <div class="header">
     <div class="logo">
-      <svg viewBox="0 0 24 24" fill="#07142a">
-        <path d="M12 2 L20 8 L18 22 L6 22 L4 8 Z" stroke="#07142a" stroke-width="0.6" stroke-linejoin="round"/>
-        <rect x="8" y="11" width="8" height="6" fill="#FFFFFF" opacity="0.4"/>
-      </svg>
+      <img src="/icon-192.png" alt="ShipTrackr" />
     </div>
     <div class="brand">
       <div class="tag">Changelog &middot; Build 1.1</div>
